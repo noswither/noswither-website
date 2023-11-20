@@ -5,8 +5,10 @@ import AboutUs from './components/AboutUs';
 import ContactPage from './components/ContactPage';
 import StorePage from "./components/StorePage"
 import CommunityPage from "./components/CommunityPage"
+import Navbar from "./components/SharedComponents/Navbar"
 import DOTS from 'vanta/src/vanta.dots'
 import {useEffect} from 'react'
+
 function App() {
     useEffect(() => {
     DOTS({
@@ -25,31 +27,19 @@ function App() {
         showLines: false
     })
     }, [])
-	return (
-        
+  
+	
+    return (
 		<BrowserRouter>
-        <div className="navbar bg-base-100 fixed">
-			<div className="flex-1">
-				<Link className="btn btn-ghost normal-case text-3xl font-akira" to="/">TURBOTHREADS</Link>
-			</div>
-			<div className="flex-none">
-				<ul className="menu menu-horizontal px-1 text-lg gap-2 font-poppins">
-					<li><Link to="/store">Store</Link></li>	
-					<li><Link to="/about">About Us</Link></li>
-                    <li><Link to="/contact">Find Us</Link></li>
-                    <button className="btn btn-outline btn-accent"><Link to="/community">Community</Link></button>
-				</ul>
-			</div>
-		</div>
-
-        <div className="vanta" id="vanta">
+        <Navbar/>
+            <div className="vanta" id="vanta"> 
 			<Routes>
 				<Route exact path="/" element={<HomePage/>}></Route>
 				<Route path="about" element={<AboutUs/>}></Route>
 				<Route path="contact" element={<ContactPage/>}></Route>
 				<Route path="store" element={<StorePage/>}></Route>
                 <Route path="community" element={<CommunityPage/>}></Route>
-			</Routes>
+            </Routes>
         </div>
 		</BrowserRouter>
 	)

@@ -16,5 +16,9 @@
     height: 100vh;
     width: 100vw;
     z-index: -1;
-}
 
+}
+.navbar{
+    border-radius: 10px;    
+
+}
