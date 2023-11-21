@@ -12,7 +12,9 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-nice-scroll": "^1.0.0",
     "react-router-dom": "^6.19.0",
+    "scrolly-video": "^0.0.16",
     "three": "^0.158.0",
     "vanta": "^0.5.24"
   },
