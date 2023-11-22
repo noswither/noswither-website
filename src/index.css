@@ -4,10 +4,24 @@
 @tailwind components;
 @tailwind utilities;
 
+.body{
+background-image: url('background.jpg');
+}
+
 .stroked {
   color: white;
   -webkit-text-fill-color: transparent;
   -webkit-text-stroke-width: 1px;
+  margin-top: 0px;
+}
+
+.bottom{
+    color: #e06544;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke-width: 1px;
+    font-size: 80px;
+    font-style: italic;
+    padding-bottom: 2rem;
 }
 
 .vanta {
@@ -21,6 +35,18 @@
   border-radius: 10px;
 }
 
-.vid {
-  mix-blend-mode: linear-dodge;
+.section{
+
+}
+
+.logo{
+    width: 300px;
+    height: 300px;
+    margin-left: 0rem;
+    margin-right: -1rem;
+}
+
+.video {
+    height: 100vh;
+    width: 100vw;
 }

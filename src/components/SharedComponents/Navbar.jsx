@@ -24,7 +24,7 @@ function Navbar() {
   return (
     <div className="navbar bg-transparent backdrop-blur-[2px] fixed">
       <div className="flex-1">
-        <Link className="btn btn-ghost normal-case text-3xl font-akira" to="/">
+        <Link className="btn btn-ghost normal-case text-3xl font-akira italic" to="/">
           TURBOTHREADS
         </Link>
       </div>
@@ -33,11 +33,6 @@ function Navbar() {
           <li>
             <Link className="rounded-lg" to="/store">
               Store
-            </Link>
-          </li>
-          <li>
-            <Link className="rounded-lg" to="/about">
-              About Us
             </Link>
           </li>
           <li>
