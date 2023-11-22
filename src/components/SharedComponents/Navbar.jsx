@@ -14,7 +14,7 @@ function Navbar() {
       scale: 1.0,
       scaleMobile: 1.0,
       color: 0xffffff,
-      backgroundColor: 0x202020,
+      backgroundColor: 0x1c1c1c,
       size: 3.0,
       spacing: 25.0,
       showLines: false,
@@ -24,7 +24,11 @@ function Navbar() {
   return (
     <div className="navbar bg-transparent backdrop-blur-[2px] fixed">
       <div className="flex-1">
-        <Link className="btn btn-ghost normal-case text-3xl font-akira italic" to="/">
+        <Link
+          className="btn btn-ghost normal-case text-3xl font-akira italic"
+          to="/"
+        >
+          <img src="logo.png" className="w-20 h-20"></img>
           TURBOTHREADS
         </Link>
       </div>

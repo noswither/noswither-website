@@ -4,8 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
-.body{
-background-image: url('background.jpg');
+.body {
+  background-image: url("background.jpg");
 }
 
 .stroked {
@@ -15,13 +15,17 @@ background-image: url('background.jpg');
   margin-top: 0px;
 }
 
-.bottom{
-    color: #e06544;
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke-width: 1px;
-    font-size: 80px;
-    font-style: italic;
-    padding-bottom: 2rem;
+.bottom {
+  color: #e06544;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke-width: 1px;
+  font-size: 80px;
+  font-style: italic;
+  padding-bottom: 2rem;
+}
+
+.btn-ghost {
+  height: 5rem;
 }
 
 .vanta {
@@ -35,18 +39,22 @@ background-image: url('background.jpg');
   border-radius: 10px;
 }
 
-.section{
-
+.secmain {
+  position: sticky;
 }
 
-.logo{
-    width: 300px;
-    height: 300px;
-    margin-left: 0rem;
-    margin-right: -1rem;
+.logo {
+  width: 300px;
+  height: 300px;
+  margin-left: 0rem;
+  margin-right: -1rem;
 }
 
 .video {
-    height: 100vh;
-    width: 100vw;
+  height: 100vh;
+  width: 100vw;
+}
+
+.hero {
+  box-shadow: 0 0 1000px 20px #d46244;
 }
