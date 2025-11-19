@@ -8,11 +8,10 @@ function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
   const calendarId = import.meta.env.VITE_CALENDAR_ID;
-  // In production we use the serverless function. In dev you can set VITE_DEV_REGISTER_ENDPOINT
+  // Prefer serverless proxy in production. In dev you can set VITE_DEV_REGISTER_ENDPOINT
   // to point directly to the Apps Script Web App to avoid 404s.
   const serverEndpoint =
     (import.meta.env.DEV && import.meta.env.VITE_DEV_REGISTER_ENDPOINT) || "/api/register";
-  const devSecret = import.meta.env.DEV ? import.meta.env.VITE_DEV_SHEETS_SHARED_SECRET : undefined;
   const publicSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_WEBAPP_URL; // optional direct fallback
 
   const presetEvent = searchParams.get("event") || "";
@@ -61,6 +60,8 @@ function RegisterPage() {
     loadUpcomingList();
   }, [apiKey, calendarId]);
 
+  // No reCAPTCHA, we rely on server-side proxy validation
+
   const [form, setForm] = useState({
     name: "",
     plate: "",
@@ -77,6 +78,10 @@ function RegisterPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.name || !form.plate || !form.model || !form.event) return;
+    if (!publicSheetsUrl) {
+      alert("Registration is temporarily unavailable. Try again later.");
+      return;
+    }
     setSubmitting(true);
     try {
       const payload = {
@@ -85,9 +90,6 @@ function RegisterPage() {
         carNumberPlate: form.plate,
         carMakeModel: form.model,
         contactNumber: form.contact,
-        ...(import.meta.env.DEV && serverEndpoint !== "/api/register" && devSecret
-          ? { token: devSecret }
-          : {}),
       };
       let ok = false;
       try {
@@ -100,17 +102,13 @@ function RegisterPage() {
       } catch {
         ok = false;
       }
-      // Fallback: direct to Apps Script (no-cors) if configured
+      // Fallback: direct to Apps Script (no-cors) if proxy is unavailable
       if (!ok && publicSheetsUrl) {
         await fetch(publicSheetsUrl, {
           method: "POST",
           mode: "no-cors",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...payload,
-            // include dev secret only in local if you set it
-            ...(import.meta.env.DEV && devSecret ? { token: devSecret } : {}),
-          }),
+          body: JSON.stringify(payload),
         }).catch(() => {});
         ok = true; // we can't read result in no-cors; assume success
       }
