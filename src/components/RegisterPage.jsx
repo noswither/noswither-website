@@ -154,7 +154,7 @@ function RegisterPage() {
           </div>
         </form>
         <div className="opacity-70 text-sm">
-          Note: Your registration is logged to our internal sheet. Location details are never published publicly.
+          Note: Your registration is logged to our internal database. Location and other personal details are never published publicly.
         </div>
       </div>
     </section>
