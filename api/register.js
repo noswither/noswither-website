@@ -1,4 +1,11 @@
 export default async function handler(req, res) {
+  // CORS for safety (same-origin in prod, but keep generic)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, error: 'Method Not Allowed' });
   }
@@ -9,7 +16,16 @@ export default async function handler(req, res) {
       return res.status(500).json({ ok: false, error: 'Server not configured' });
     }
 
-    const { eventName, driverName, carNumberPlate, carMakeModel } = req.body || {};
+    // Vercel should parse JSON automatically; fallback if empty
+    let body = req.body;
+    if (!body || Object.keys(body).length === 0) {
+      const buffers = [];
+      for await (const chunk of req) buffers.push(chunk);
+      const raw = Buffer.concat(buffers).toString('utf8') || '{}';
+      body = JSON.parse(raw);
+    }
+
+    const { eventName, driverName, carNumberPlate, carMakeModel, contactNumber } = body || {};
     if (!eventName || !driverName || !carNumberPlate || !carMakeModel) {
       return res.status(400).json({ ok: false, error: 'Missing fields' });
     }
@@ -20,6 +36,7 @@ export default async function handler(req, res) {
       driverName: String(driverName).slice(0, 80),
       carNumberPlate: String(carNumberPlate).slice(0, 40),
       carMakeModel: String(carMakeModel).slice(0, 120),
+      contactNumber: contactNumber ? String(contactNumber).slice(0, 32) : '',
       token: SHEETS_SECRET,
     };
 

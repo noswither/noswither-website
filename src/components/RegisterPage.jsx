@@ -8,7 +8,11 @@ function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
   const calendarId = import.meta.env.VITE_CALENDAR_ID;
-  const serverEndpoint = "/api/register"; // serverless proxy endpoint
+  // In production we use the serverless function. In dev you can set VITE_DEV_REGISTER_ENDPOINT
+  // to point directly to the Apps Script Web App to avoid 404s.
+  const serverEndpoint =
+    (import.meta.env.DEV && import.meta.env.VITE_DEV_REGISTER_ENDPOINT) || "/api/register";
+  const devSecret = import.meta.env.DEV ? import.meta.env.VITE_DEV_SHEETS_SHARED_SECRET : undefined;
 
   const presetEvent = searchParams.get("event") || "";
 
@@ -60,6 +64,7 @@ function RegisterPage() {
     name: "",
     plate: "",
     model: "",
+    contact: "",
     event: presetEvent,
   });
 
@@ -78,6 +83,10 @@ function RegisterPage() {
         driverName: form.name,
         carNumberPlate: form.plate,
         carMakeModel: form.model,
+        contactNumber: form.contact,
+        ...(import.meta.env.DEV && serverEndpoint !== "/api/register" && devSecret
+          ? { token: devSecret }
+          : {}),
       };
       const res = await fetch(serverEndpoint, {
         method: "POST",
@@ -85,7 +94,7 @@ function RegisterPage() {
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Submit failed");
-      setForm({ name: "", plate: "", model: "", event: "" });
+      setForm({ name: "", plate: "", model: "", contact: "", event: "" });
       alert("Registered. See you at the run.");
     } catch {
       alert("Could not submit. Please try again later.");
@@ -128,6 +137,10 @@ function RegisterPage() {
             <div className="form-control">
               <label className="label"><span className="label-text">Car Number Plate</span></label>
               <input name="plate" value={form.plate} onChange={handleChange} className="input input-bordered" required />
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text">Contact Number</span></label>
+              <input name="contact" value={form.contact} onChange={handleChange} className="input input-bordered" required />
             </div>
             <div className="form-control md:col-span-2">
               <label className="label"><span className="label-text">Car Make & Model</span></label>

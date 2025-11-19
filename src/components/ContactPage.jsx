@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 function ContactPage(){
 	const [events, setEvents] = useState([]);
-	const [upcoming, setUpcoming] = useState(null);
+	const [upcoming, setUpcoming] = useState([]);
 	const [loadingUpcoming, setLoadingUpcoming] = useState(true);
 	const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
 	const calendarId = import.meta.env.VITE_CALENDAR_ID; // e.g. your_calendar_id@group.calendar.google.com
@@ -21,7 +21,7 @@ function ContactPage(){
 	}, []);
 
 	useEffect(() => {
-		// Load next upcoming event: prefer ICS (no API key), fallback to JSON API if envs exist
+		// Load all upcoming events: prefer ICS (no API key), fallback to JSON API if envs exist
 		async function loadUpcomingViaICS() {
 			const icsUrlFallback = "https://calendar.google.com/calendar/ical/noswither%40gmail.com/public/basic.ics"; // user-provided
 			const icsUrl = icsUrlEnv || icsUrlFallback;
@@ -46,12 +46,10 @@ function ContactPage(){
                 }
 				if (!res || !res.ok) throw new Error("ics fetch failed");
 				const text = await res.text();
-				const next = pickNextFromICS(text);
-				if (next) {
-					setUpcoming(next);
-					setLoadingUpcoming(false);
-					return;
-				}
+				const list = pickAllFutureFromICS(text);
+				setUpcoming(list);
+				setLoadingUpcoming(false);
+				return;
 			} catch (e) {
 				// ignore and fall back to API if available
 			}
@@ -62,20 +60,20 @@ function ContactPage(){
 			}
 			try {
 				const timeMin = new Date().toISOString();
-				const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?timeMin=${encodeURIComponent(timeMin)}&maxResults=1&singleEvents=true&orderBy=startTime&key=${encodeURIComponent(apiKey)}`;
+				const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?timeMin=${encodeURIComponent(timeMin)}&maxResults=25&singleEvents=true&orderBy=startTime&key=${encodeURIComponent(apiKey)}`;
 				const res = await fetch(url);
 				if (res.ok) {
 					const data = await res.json();
-					const item = (data.items && data.items[0]) || null;
-					if (item) {
-						const collaborator = parseCollaborator(item.description || "");
-						setUpcoming({
+					const list = (data.items || [])
+						.map((item) => ({
 							name: item.summary || "Upcoming Event",
-							where: item.location || "TBA",
 							when: getEventDateLabel(item.start, item.end),
-							collaborator,
-						});
-					}
+							collaborator: parseCollaborator(item.description || ""),
+							startRaw: item.start?.dateTime || item.start?.date || "",
+						}))
+						.filter((e) => (e.startRaw ? new Date(e.startRaw).getTime() >= Date.now() : true))
+						.sort((a, b) => new Date(a.startRaw) - new Date(b.startRaw));
+					setUpcoming(list);
 				}
 			} finally {
 				setLoadingUpcoming(false);
@@ -208,20 +206,18 @@ function ContactPage(){
 		return isNaN(parsed) ? null : parsed;
 	}
 
-	function pickNextFromICS(icsText) {
+	function pickAllFutureFromICS(icsText) {
 		const events = parseICSEvents(icsText);
 		const now = Date.now();
 		const future = events
 			.filter(e => e.start && e.start.getTime() >= now)
 			.sort((a,b) => a.start.getTime() - b.start.getTime());
-		const next = future[0];
-		if (!next) return null;
-		return {
-			name: next.summary,
-			where: next.location || "TBA",
-			when: formatInIndia(next.start),
-			collaborator: parseCollaborator(next.description || ""),
-		};
+		return future.map(e => ({
+			name: e.summary,
+			when: formatInIndia(e.start),
+			collaborator: parseCollaborator(e.description || ""),
+			startRaw: e.start?.toISOString?.() || ""
+		}));
 	}
 
 	return(
@@ -239,21 +235,23 @@ function ContactPage(){
 						</div>
 						{loadingUpcoming ? (
 							<div className="opacity-70">Loading...</div>
-						) : upcoming ? (
-							<div className="flex flex-col gap-2">
-								<div className="text-xl font-poppins">{upcoming.name}</div>
-								<div className="opacity-80">When: {upcoming.when}</div>
-								{upcoming.collaborator && (
-									<div className="opacity-80">Collaborator: {upcoming.collaborator}</div>
-								)}
-								<div className="mt-3">
-									<a href={`/register?event=${encodeURIComponent(upcoming.name)}`} className="btn btn-outline btn-accent btn-sm">
-										Register
-									</a>
-								</div>
+						) : upcoming && upcoming.length > 0 ? (
+							<div className="flex flex-col gap-4">
+								{upcoming.map((u, idx) => (
+									<div key={idx} className="p-3 rounded-lg bg-base-100/40 border border-base-300/30">
+										<div className="text-lg font-poppins">{u.name}</div>
+										<div className="opacity-80">When: {u.when}</div>
+										{u.collaborator && <div className="opacity-80">Collaborator: {u.collaborator}</div>}
+										<div className="mt-2">
+											<a href={`/register?event=${encodeURIComponent(u.name)}`} className="btn btn-outline btn-accent btn-sm">
+												Register
+											</a>
+										</div>
+									</div>
+								))}
 							</div>
 						) : (
-							<div className="opacity-80">No upcoming event</div>
+							<div className="opacity-80">No upcoming events</div>
 						)}
 					</div>
 				</div>
