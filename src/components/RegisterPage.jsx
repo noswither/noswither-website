@@ -13,6 +13,7 @@ function RegisterPage() {
   const serverEndpoint =
     (import.meta.env.DEV && import.meta.env.VITE_DEV_REGISTER_ENDPOINT) || "/api/register";
   const devSecret = import.meta.env.DEV ? import.meta.env.VITE_DEV_SHEETS_SHARED_SECRET : undefined;
+  const publicSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_WEBAPP_URL; // optional direct fallback
 
   const presetEvent = searchParams.get("event") || "";
 
@@ -88,12 +89,32 @@ function RegisterPage() {
           ? { token: devSecret }
           : {}),
       };
-      const res = await fetch(serverEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error("Submit failed");
+      let ok = false;
+      try {
+        const res = await fetch(serverEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        ok = res.ok;
+      } catch {
+        ok = false;
+      }
+      // Fallback: direct to Apps Script (no-cors) if configured
+      if (!ok && publicSheetsUrl) {
+        await fetch(publicSheetsUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...payload,
+            // include dev secret only in local if you set it
+            ...(import.meta.env.DEV && devSecret ? { token: devSecret } : {}),
+          }),
+        }).catch(() => {});
+        ok = true; // we can't read result in no-cors; assume success
+      }
+      if (!ok) throw new Error("Submit failed");
       setForm({ name: "", plate: "", model: "", contact: "", event: "" });
       alert("Registered. See you at the run.");
     } catch {
@@ -154,7 +175,7 @@ function RegisterPage() {
           </div>
         </form>
         <div className="opacity-70 text-sm">
-          Note: Your registration is logged to our internal database. Location and other personal details are never published publicly.
+          Note: Your registration is logged to our internal database. Location and other personal details are never published.
         </div>
       </div>
     </section>
