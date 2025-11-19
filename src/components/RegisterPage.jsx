@@ -78,10 +78,6 @@ function RegisterPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.name || !form.plate || !form.model || !form.event) return;
-    if (!publicSheetsUrl) {
-      alert("Registration is temporarily unavailable. Try again later.");
-      return;
-    }
     setSubmitting(true);
     try {
       const payload = {
