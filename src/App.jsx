@@ -12,6 +12,7 @@ import {gsap, CSSPlugin,Expo} from 'gsap'
 gsap.registerPlugin(CSSPlugin);
 import { Parallax, ParallaxLayer } from '@react-spring/parallax';
 import TeamPage from "./components/TeamPage";
+import RegisterPage from "./components/RegisterPage";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -24,6 +25,7 @@ function AnimatedRoutes() {
           <Route path="store" element={<StorePage />}></Route>
           <Route path="app" element={<CommunityPage />}></Route>
           <Route path="team" element={<TeamPage />}></Route>
+          <Route path="register" element={<RegisterPage />}></Route>
         </Routes>
       </div>
     </div>

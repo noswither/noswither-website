@@ -246,6 +246,11 @@ function ContactPage(){
 								{upcoming.collaborator && (
 									<div className="opacity-80">Collaborator: {upcoming.collaborator}</div>
 								)}
+								<div className="mt-3">
+									<a href={`/register?event=${encodeURIComponent(upcoming.name)}`} className="btn btn-outline btn-accent btn-sm">
+										Register
+									</a>
+								</div>
 							</div>
 						) : (
 							<div className="opacity-80">No upcoming event</div>

@@ -36,7 +36,7 @@ function HomeContainer() {
             <div>
               <h1 className="bottom font-akira text-4xl md:text-7xl">JOIN THE CULT</h1>
               <p className="py-6">
-                NoSwither unites real driving enthusiasts through night runs, clean builds, and a culture of respect, passion, and precision. We host curated sessions from midnight cruises to early morning drives that celebrate pure driving and underground car culture.
+                NoSwither unites real driving enthusiasts through night runs, clean builds, and a culture of respect, passion, and precision. We host curated sessions from midnight cruises to early morning drives that celebrate pure driving and underground car culture. When the city sleeps, we hit the streets.
               </p>
               <Link to="/team" className="btn btn-outline btn-accent">Meet the Team</Link>
             </div>
