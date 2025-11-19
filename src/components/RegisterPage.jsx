@@ -8,8 +8,7 @@ function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
   const calendarId = import.meta.env.VITE_CALENDAR_ID;
-  const sheetsEndpoint = import.meta.env.VITE_GOOGLE_SHEETS_WEBAPP_URL; // Apps Script webapp URL
-  const sheetsToken = import.meta.env.VITE_SHEETS_SHARED_SECRET; // shared secret for validation
+  const serverEndpoint = "/api/register"; // serverless proxy endpoint
 
   const presetEvent = searchParams.get("event") || "";
 
@@ -74,18 +73,13 @@ function RegisterPage() {
     if (!form.name || !form.plate || !form.model || !form.event) return;
     setSubmitting(true);
     try {
-      if (!sheetsEndpoint) {
-        alert("Registration endpoint not configured. Ask admin to set VITE_GOOGLE_SHEETS_WEBAPP_URL.");
-        return;
-      }
       const payload = {
         eventName: form.event,
         driverName: form.name,
         carNumberPlate: form.plate,
         carMakeModel: form.model,
-        token: sheetsToken || undefined,
       };
-      const res = await fetch(sheetsEndpoint, {
+      const res = await fetch(serverEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

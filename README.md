@@ -49,7 +49,10 @@ function doPost(e) {
 3. Deploy → New deployment → type “Web app”
    - Execute as: Me
    - Who has access: Anyone
-   - Copy the URL and set `VITE_GOOGLE_SHEETS_WEBAPP_URL` to that value.
+   - Copy the URL and set server env in Vercel (Project → Settings → Environment Variables):
+     - SHEETS_WEBAPP_URL = (your web app URL)
+     - SHEETS_SHARED_SECRET = same as in Script properties
+   - Do NOT expose these with VITE_ in the client. The site calls `/api/register` which forwards securely.
 
 ### Add a shared secret (recommended)
 - In Apps Script → Project Settings → Script properties, add:
@@ -65,3 +68,8 @@ function doPost(e) {
   // ... append-only logic shown above ...
 }
 ```
+
+### How it flows
+- Client → POST /api/register with { eventName, driverName, carNumberPlate, carMakeModel }
+- Vercel Function (api/register.js) adds the secret from server env and forwards to the Apps Script Web App
+- Apps Script validates the secret and appends to the correct sheet
