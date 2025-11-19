@@ -1,0 +1,57 @@
+[
+  {
+    "id": "founder",
+    "name": "NXK",
+    "title": "Runner 001 / Founder",
+    "image": "/nxk.jpeg",
+    "description": "Founder and visionary of the NoSwither community. The original speed demon.",
+    "link": "https://instagram.com/whixkey.nline",
+    "linkLabel": "Instagram"
+  },
+  {
+    "id": "tech",
+    "name": "Icarus",
+    "title": "Hacker - Technical Specialist",
+    "image": "/icarus.jpeg",
+    "description": "Resident engineering and technical powerhouse. Systems wizard.",
+    "link": "https://icarus.codes",
+    "linkLabel": "Website"
+  },
+  {
+    "id": "comms",
+    "name": "RS",
+    "title": "Comms and Ops",
+    "image": "/rah.jpg",
+    "description": "Chief Communications officer. Adrenaline fiend.",
+    "link": "https://instagram.com/rahhul.sk",
+    "linkLabel": "Instagram"
+  },
+  {
+    "id": "media",
+    "name": "Loki",
+    "title": "Filmographer and Editor",
+    "image": "/praise.JPG",
+    "description": "Artistic genius. Storytelling maestro.",
+    "link": "https://instagram.com/_shotsbyloki",
+    "linkLabel": "Instagram"
+  },
+  {
+    "id": "media",
+    "name": "RetroRyder",
+    "title": "Floating Utility Player",
+    "image": "/retro.JPG",
+    "description": "Automobile engineer, mechanical wizard. Reserve editor.",
+    "link": "https://instagram.com/retroryderr",
+    "linkLabel": "Instagram"
+  },
+  {
+    "id": "media",
+    "name": "Chiaadi",
+    "title": "Filmographer",
+    "image": "/adi.jpeg",
+    "description": "Footage ninja. Visual storyteller.",
+    "link": "https://instagram.com/chiaadi_",
+    "linkLabel": "Instagram"
+  }
+]
+

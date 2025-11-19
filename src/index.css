@@ -4,6 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 .body {
   background-image: url("background.jpg");
 }
@@ -16,7 +20,7 @@
 }
 
 .bottom {
-  color: #e06544;
+  color: #8c89d4;
   -webkit-text-fill-color: transparent;
   -webkit-text-stroke-width: 1px;
   font-size: 80px;
@@ -31,9 +35,12 @@
 .vanta {
   margin: 0;
   padding: 0;
-  height: 100vh;
+  position: fixed;
+  inset: 0;
   width: 100vw;
+  height: 100vh;
   z-index: -1;
+  pointer-events: none;
 }
 .navbar {
   border-radius: 10px;
@@ -56,5 +63,95 @@
 }
 
 .hero {
-  box-shadow: 0 0 1000px 20px #d46244;
+  box-shadow: 0 0 1200px 40px rgba(45, 43, 92, 0.6);
+  animation: heroGlowFlow 8s ease-in-out infinite;
+  will-change: box-shadow;
 }
+
+@keyframes heroGlowFlow {
+  0% {
+    box-shadow: 0 0 1000px 30px rgba(45, 43, 92, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 1500px 70px rgba(45, 43, 92, 0.85);
+  }
+  100% {
+    box-shadow: 0 0 1000px 30px rgba(45, 43, 92, 0.55);
+  }
+}
+
+/* Subtle blink for accent button */
+.blink-soft {
+  animation: blinkSoft 2.4s ease-in-out infinite;
+}
+
+@keyframes blinkSoft {
+  0%,
+  100% {
+    box-shadow: 0 0 0px 0 rgba(140, 137, 212, 0.25);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 16px 3px rgba(140, 137, 212, 0.45);
+    filter: brightness(1.06);
+  }
+}
+
+/* Floating social buttons glow */
+.social-btn {
+  box-shadow: 0 0 14px 2px rgba(140, 137, 212, 0.35);
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+.social-btn:hover {
+  box-shadow: 0 0 22px 6px rgba(140, 137, 212, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Active indicator (green pulse) */
+@keyframes pulseActive {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0.75); }
+  50% { transform: scale(1.15); box-shadow: 0 0 12px 8px rgba(34,197,94,0.28); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+.dot-active {
+  width: 11px;
+  height: 11px;
+  border-radius: 9999px;
+  background-color: #22c55e; /* tailwind green-500 */
+  animation: pulseActive 1.4s ease-out infinite;
+}
+/* Scroll helpers */
+.scroll-area {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Page load animation */
+@keyframes pageFadeSlide {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: pageFadeSlide 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* Mobile menu animations */
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-overlay-fade-in {
+  animation: overlayFadeIn 220ms ease-out;
+}
+
+@keyframes menuEnter {
+  0% { opacity: 0; transform: translateY(10px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-menu-enter {
+  animation: menuEnter 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.animate-menu-item {
+  animation: menuEnter 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation-fill-mode: both;
+}
+/* (preloader styles removed) */

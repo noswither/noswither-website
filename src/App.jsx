@@ -1,16 +1,34 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
 import HomePage from "./components/HomePage";
-import AboutUs from "./components/AboutUs";
 import ContactPage from "./components/ContactPage";
 import StorePage from "./components/StorePage";
 import CommunityPage from "./components/CommunityPage";
 import Navbar from "./components/SharedComponents/Navbar";
+import SocialFloat from "./components/SharedComponents/SocialFloat";
 import DOTS from "vanta/src/vanta.dots";
 import { useEffect } from "react";
 import {gsap, CSSPlugin,Expo} from 'gsap'
 gsap.registerPlugin(CSSPlugin);
 import { Parallax, ParallaxLayer } from '@react-spring/parallax';
+import TeamPage from "./components/TeamPage";
+
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <div className="relative z-10">
+      <div key={location.pathname} className="page-enter">
+        <Routes location={location}>
+          <Route exact path="/" element={<HomePage />}></Route>
+          <Route path="events" element={<ContactPage />}></Route>
+          <Route path="store" element={<StorePage />}></Route>
+          <Route path="app" element={<CommunityPage />}></Route>
+          <Route path="team" element={<TeamPage />}></Route>
+        </Routes>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   useEffect(() => {
@@ -34,15 +52,9 @@ function App() {
   return (
     <BrowserRouter>
       <Navbar />
-    <div className="vanta" id="vanta">
-        <Routes>
-          <Route exact path="/" element={<HomePage />}></Route>
-          <Route path="about" element={<AboutUs />}></Route>
-          <Route path="contact" element={<ContactPage />}></Route>
-          <Route path="store" element={<StorePage />}></Route>
-          <Route path="community" element={<CommunityPage />}></Route>
-        </Routes>
-      </div>
+      <div className="vanta" id="vanta"></div>
+      <AnimatedRoutes />
+      <SocialFloat />
     </BrowserRouter>
   );
 }

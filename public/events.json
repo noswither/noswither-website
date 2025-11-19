@@ -1,0 +1,25 @@
+[
+  {
+    "id": "evt-2025-11-nightshift-vol-2",
+    "title": "NightShift Vol. 2",
+    "date": "2025-11-15T23:30:00+05:30",
+    "image": "/ns2.JPG",
+    "description": "Second edition of the NightShift Series. Featuring Cruise Culture."
+  },
+  {
+    "id": "evt-2025-10-ns-x-cc",
+    "title": "NoSwither x Cruise Culture",
+    "date": "2025-10-19T05:30:00+05:30",
+    "image": "/nscc.jpeg",
+    "description": "First collaborative event with Cruise Culture. A brisk morning run, followed by a meet and greet during breakfast."
+  },
+  {
+    "id": "evt-2025-06-nightshift-vol-1",
+    "title": "Nightshift Vol. 1",
+    "date": "2025-06-21T00:00:00+05:30",
+
+    "image": "/ns1.JPG",
+    "description": "First edition of the NightShift Series. A tight, coordinated and quick run through the city. Don't trip."
+  }
+]
+

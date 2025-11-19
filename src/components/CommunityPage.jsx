@@ -7,19 +7,12 @@ function CommunityPage() {
 
       <section
         id="about"
-        className="flex flex-col justify-center items-center h-screen"
+        className="flex flex-col justify-center items-center h-screen px-4"
       >
-        <div className="w-7/12 flex flex-col gap-4">
-          <div className="font-bungee text-4xl">About Us</div>
-          <div className="text-lg font-jetbrains">
-            Our goal is to make sure good ideas are represented by great
-            collaborations. With the increasing competition in entrance exams,
-            people often end up in universities they initially didn't want to.
-            Regardless of the university, it's always possible that people come
-            up with a unique idea but just can't find people who want to work on
-            it. We move to tackle this issue permanently. All you have to do is
-            worry about the idea. Let us help you find the best possible peer
-            group to work on it ,within your university :)
+        <div className="w-11/12 md:w-7/12 flex flex-col gap-4">
+          <div className="font-bungee text-3xl sm:text-4xl">SwitherSync Application</div>
+          <div className="text-base sm:text-lg font-jetbrains">
+          SwitherSync is an in-house application engineered by the NoSwither team to streamline runs by allowing multiple drivers join a single convoy and keep track of other drivers and any alerts during the run. Application is currently in its alpha phase, more details will be added soon.
           </div>
         </div>
       </section>

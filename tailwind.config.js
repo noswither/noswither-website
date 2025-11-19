@@ -19,6 +19,7 @@ export default {
         {
         business: {
           ...require("daisyui/src/theming/themes")["business"],
+          accent: "#8c89d4",
           ".btn":{
           "border-radius" : "10px",
             },
