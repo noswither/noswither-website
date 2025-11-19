@@ -62,6 +62,48 @@ function RegisterPage() {
 
   // No reCAPTCHA, we rely on server-side proxy validation
 
+  // Submit to Apps Script without CORS by using a hidden iframe + form POST
+  function submitViaHiddenForm(url, fields) {
+    return new Promise((resolve) => {
+      const iframe = document.createElement("iframe");
+      iframe.name = `reg_iframe_${Date.now()}`;
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+
+      const form = document.createElement("form");
+      form.action = url;
+      form.method = "POST";
+      form.target = iframe.name;
+
+      Object.entries(fields).forEach(([key, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value == null ? "" : String(value);
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+
+      const cleanup = () => {
+        try { form.remove(); } catch {}
+        try { iframe.remove(); } catch {}
+      };
+      iframe.addEventListener("load", () => {
+        cleanup();
+        resolve(true);
+      }, { once: true });
+
+      // Fallback resolve in case load doesn't fire due to cross-origin
+      setTimeout(() => {
+        cleanup();
+        resolve(true);
+      }, 2000);
+
+      form.submit();
+    });
+  }
+
   const [form, setForm] = useState({
     name: "",
     plate: "",
@@ -95,31 +137,9 @@ function RegisterPage() {
         carMakeModel: form.model,
         contactNumber: form.contact,
       };
-      // Primary: direct to Apps Script (like your guestbook)
+      // Primary: direct to Apps Script without CORS using hidden form
       if (sheetsUrl) {
-        try {
-          const res = await fetch(sheetsUrl, {
-            method: "POST",
-            mode: "cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-          if (!res.ok) {
-            // Do not fallback for explicit HTTP errors (e.g., 405/400/500)
-            throw new Error(`Upstream responded ${res.status}`);
-          }
-        } catch (err) {
-          // Retry only if the CORS request failed to execute (network/CORS), not for explicit HTTP errors
-          if (err instanceof TypeError) {
-            await fetch(sheetsUrl, {
-              method: "POST",
-              mode: "no-cors",
-              body: JSON.stringify(payload),
-            }).catch(() => {});
-          } else {
-            throw err;
-          }
-        }
+        await submitViaHiddenForm(sheetsUrl, payload);
       } else {
         // Dev fallback: proxy in local dev if configured
         const res = await fetch(serverEndpoint, {
