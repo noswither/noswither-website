@@ -80,6 +80,14 @@ function RegisterPage() {
     if (!form.name || !form.plate || !form.model || !form.event) return;
     setSubmitting(true);
     try {
+      // Normalize Sheets URL to avoid "/@https:/" mistakes
+      let sheetsUrl = (publicSheetsUrl || "").trim();
+      if (sheetsUrl.startsWith("/@https://")) sheetsUrl = sheetsUrl.replace(/^\/@https:\/\//, "https://");
+      if (sheetsUrl.startsWith("@https://")) sheetsUrl = sheetsUrl.replace(/^@https:\/\//, "https://");
+      if (sheetsUrl.startsWith("https:/") && !sheetsUrl.startsWith("https://")) sheetsUrl = sheetsUrl.replace(/^https:\//, "https://");
+      if (sheetsUrl.startsWith("@http://")) sheetsUrl = sheetsUrl.replace(/^@http:\/\//, "http://");
+      if (sheetsUrl.startsWith("http:/") && !sheetsUrl.startsWith("http://")) sheetsUrl = sheetsUrl.replace(/^http:\//, "http://");
+
       const payload = {
         eventName: form.event,
         driverName: form.name,
@@ -87,43 +95,40 @@ function RegisterPage() {
         carMakeModel: form.model,
         contactNumber: form.contact,
       };
-      let ok = false;
       // Primary: direct to Apps Script (like your guestbook)
-      if (publicSheetsUrl) {
+      if (sheetsUrl) {
         try {
-          const res = await fetch(publicSheetsUrl, {
+          const res = await fetch(sheetsUrl, {
             method: "POST",
             mode: "cors",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           });
-          ok = res.ok;
-        } catch {
-          ok = false;
-        }
-        // Retry with no-cors (Apps Script often works without CORS headers)
-        if (!ok) {
-          await fetch(publicSheetsUrl, {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify(payload),
-          }).catch(() => {});
-          ok = true; // no-cors doesn't expose status; assume success
+          if (!res.ok) {
+            // Do not fallback for explicit HTTP errors (e.g., 405/400/500)
+            throw new Error(`Upstream responded ${res.status}`);
+          }
+        } catch (err) {
+          // Retry only if the CORS request failed to execute (network/CORS), not for explicit HTTP errors
+          if (err instanceof TypeError) {
+            await fetch(sheetsUrl, {
+              method: "POST",
+              mode: "no-cors",
+              body: JSON.stringify(payload),
+            }).catch(() => {});
+          } else {
+            throw err;
+          }
         }
       } else {
         // Dev fallback: proxy in local dev if configured
-        try {
-          const res = await fetch(serverEndpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-          ok = res.ok;
-        } catch {
-          ok = false;
-        }
+        const res = await fetch(serverEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }).catch(() => null);
+        if (!res || !res.ok) throw new Error("Submit failed");
       }
-      if (!ok) throw new Error("Submit failed");
       setForm({ name: "", plate: "", model: "", contact: "", event: "" });
       alert("Registered. See you at the run.");
     } catch {
