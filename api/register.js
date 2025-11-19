@@ -1,28 +1,43 @@
-export const config = { runtime: 'edge' };
+export default async function handler(req, res) {
+  const corsOrigin = '*'; // optionally replace with 'https://www.noswither.com'
+  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-export default async function handler(req) {
-  const cors = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
-  };
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 200, headers: cors });
+    res.status(200).end();
+    return;
   }
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ ok: false, error: 'Method Not Allowed' }), { status: 405, headers: { ...cors, 'Content-Type': 'application/json' } });
+    res.status(405).json({ ok: false, error: 'Method Not Allowed' });
+    return;
   }
   try {
     const SHEETS_URL = process.env.SHEETS_WEBAPP_URL;
     const SHEETS_SECRET = process.env.SHEETS_SHARED_SECRET;
     if (!SHEETS_URL || !SHEETS_SECRET) {
-      return new Response(JSON.stringify({ ok: false, error: 'Server not configured' }), { status: 500, headers: { ...cors, 'Content-Type': 'application/json' } });
+      res.status(500).json({ ok: false, error: 'Server not configured' });
+      return;
     }
 
-    const body = await req.json();
+    const bodyText = await new Promise((resolve, reject) => {
+      let data = '';
+      req.on('data', (chunk) => { data += chunk; });
+      req.on('end', () => resolve(data));
+      req.on('error', reject);
+    });
+    let body = {};
+    try {
+      body = bodyText ? JSON.parse(bodyText) : {};
+    } catch {
+      res.status(400).json({ ok: false, error: 'Invalid JSON' });
+      return;
+    }
+
     const { eventName, driverName, carNumberPlate, carMakeModel, contactNumber } = body || {};
     if (!eventName || !driverName || !carNumberPlate || !carMakeModel) {
-      return new Response(JSON.stringify({ ok: false, error: 'Missing fields' }), { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } });
+      res.status(400).json({ ok: false, error: 'Missing fields' });
+      return;
     }
 
     const payload = {
@@ -41,11 +56,12 @@ export default async function handler(req) {
     });
     const text = await forward.text().catch(() => 'OK');
     if (!forward.ok) {
-      return new Response(JSON.stringify({ ok: false, error: 'Upstream error', detail: text }), { status: 502, headers: { ...cors, 'Content-Type': 'application/json' } });
+      res.status(502).json({ ok: false, error: 'Upstream error', detail: text });
+      return;
     }
-    return new Response(JSON.stringify({ ok: true, upstream: text }), { status: 200, headers: { ...cors, 'Content-Type': 'application/json' } });
+    res.status(200).json({ ok: true, upstream: text });
   } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: 'Unexpected error' }), { status: 500, headers: { ...cors, 'Content-Type': 'application/json' } });
+    res.status(500).json({ ok: false, error: 'Unexpected error' });
   }
 }
 
