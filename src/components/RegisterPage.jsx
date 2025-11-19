@@ -88,25 +88,40 @@ function RegisterPage() {
         contactNumber: form.contact,
       };
       let ok = false;
-      try {
-        const res = await fetch(serverEndpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        ok = res.ok;
-      } catch {
-        ok = false;
-      }
-      // Fallback: direct to Apps Script (no-cors) if proxy is unavailable
-      if (!ok && publicSheetsUrl) {
-        await fetch(publicSheetsUrl, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }).catch(() => {});
-        ok = true; // we can't read result in no-cors; assume success
+      // Primary: direct to Apps Script (like your guestbook)
+      if (publicSheetsUrl) {
+        try {
+          const res = await fetch(publicSheetsUrl, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          ok = res.ok;
+        } catch {
+          ok = false;
+        }
+        // Retry with no-cors (Apps Script often works without CORS headers)
+        if (!ok) {
+          await fetch(publicSheetsUrl, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(payload),
+          }).catch(() => {});
+          ok = true; // no-cors doesn't expose status; assume success
+        }
+      } else {
+        // Dev fallback: proxy in local dev if configured
+        try {
+          const res = await fetch(serverEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          ok = res.ok;
+        } catch {
+          ok = false;
+        }
       }
       if (!ok) throw new Error("Submit failed");
       setForm({ name: "", plate: "", model: "", contact: "", event: "" });
