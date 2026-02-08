@@ -1,5 +1,19 @@
 [
   {
+    "id": "evt-2026-01-nightshift-vol-4",
+    "title": "NightShift Vol. 2",
+    "date": "2026-01-14T23:30:00+05:30",
+    "image": "/ns4.PNG",
+    "description": "Four for Four."
+  },
+  {
+    "id": "evt-2025-12-nightshift-vol-3",
+    "title": "NightShift Vol. 3",
+    "date": "2025-12-27T23:30:00+05:30",
+    "image": "/ns3.PNG",
+    "description": "Vol. 3 - Full Throttle"
+  },
+  {
     "id": "evt-2025-11-nightshift-vol-2",
     "title": "NightShift Vol. 2",
     "date": "2025-11-15T23:30:00+05:30",
