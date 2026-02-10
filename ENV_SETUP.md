@@ -103,10 +103,9 @@ If POST to `https://your-domain.com/api/create-order` returns **405 Method Not A
 
 ## Testing ticket scan from your phone
 
-1. **Use the live site** (easiest): Open **https://www.noswither.com/register** on your laptop. Add `?testTicket=1` to the URL to show the test button: **https://www.noswither.com/register?testTicket=1**. Click **Open test ticket** so the ticket (with QR) is visible on the laptop screen.
-2. **On your phone:** Unlock the phone and open the **Camera** app (or any QR scanner app). Point it at the **QR code on the laptop screen**.
-3. When the camera recognizes the QR, a banner or notification will appear (e.g. “Open in browser” or the verify-ticket URL). **Tap it** to open the link.
-4. The phone browser will open your **verify-ticket** page and show either **Invalid ticket** (for the test ticket, since it has no real signature) or **Valid ticket** (for a real paid ticket when `TICKET_VERIFY_SECRET` is set).
-5. **To test “Valid” on the phone:** Do a real test payment (or use a paid event in test mode), then scan that ticket’s QR with your phone. You should see **Valid ticket** plus event name and driver name.
+1. **On your laptop:** Complete a **paid registration** (test or live) so a ticket with QR is generated and shown.
+2. **On your phone:** Unlock the phone and open the **Camera** app (or any QR scanner app). Point it at the **QR code on the ticket** (laptop screen or printed PDF).
+3. When the camera recognizes the QR, tap the banner/notification to open the link in the browser.
+4. The phone opens the **verify-ticket** page and shows **Valid ticket** (with event name and driver name) when `TICKET_VERIFY_SECRET` is set; otherwise **Invalid ticket**.
 
-**Tip:** If you test on **localhost** (e.g. `npm run dev`), the QR will contain `http://localhost:5173/...`. Your phone can’t open that unless you use the same machine. For phone testing, use the **deployed URL** (e.g. www.noswither.com) or run the app on your machine and access it from the phone using your computer’s local IP (e.g. `http://192.168.1.x:5173/register?testTicket=1`) on the same Wi‑Fi; then the QR will point to that IP and the phone will open the verify page on your phone’s browser.
+**Tip:** If you test on **localhost** (e.g. `npm run dev`), the QR will contain `http://localhost:5173/...`. Your phone can’t open that unless you use the same machine. For phone testing, use the **deployed URL** (e.g. www.noswither.com) or run the app on your machine and access it from the phone using your computer’s local IP (e.g. `http://192.168.1.x:5173`) on the same Wi‑Fi; then the QR will point to that IP and the phone will open the verify page on your phone’s browser.

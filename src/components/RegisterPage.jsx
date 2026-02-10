@@ -19,7 +19,6 @@ function RegisterPage() {
   const apiBase = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
 
   const presetEvent = searchParams.get("event") || "";
-  const showTestTicket = import.meta.env.DEV || searchParams.get("testTicket") === "1";
 
   // Load Razorpay script
   useEffect(() => {
@@ -372,24 +371,6 @@ function RegisterPage() {
     navigate("/");
   }
 
-  function openTestTicket() {
-    const mockDate = new Date();
-    mockDate.setDate(mockDate.getDate() + 7);
-    setTicketData({
-      eventName: "Test Run — No Real Payment",
-      eventDate: mockDate.toISOString(),
-      ticketId: `TKT-test-${Date.now()}`,
-      driverName: "Test Driver",
-      email: "test@example.com",
-      carNumberPlate: "KA01AB1234",
-      carMakeModel: "Test Car Model",
-      contactNumber: "+91 98765 43210",
-      paymentId: "pay_test_fake",
-      orderId: "order_test_fake",
-    });
-    toast.info("Showing test ticket (no payment made).");
-  }
-
   return (
     <>
       <section className="flex flex-col items-center min-h-screen px-4 pt-28 pb-10 md:pt-32 md:pb-16">
@@ -468,18 +449,6 @@ function RegisterPage() {
             Note: Your registration is logged to our internal database. Location and other personal details are never published.
             {selectedEvent?.isPaid && " For paid events, a ticket with QR code will be generated after payment."}
           </div>
-          {showTestTicket && (
-            <div className="flex flex-col gap-2">
-              <p className="text-sm text-base-content/60">Test ticket flow without paying:</p>
-              <button
-                type="button"
-                onClick={openTestTicket}
-                className="btn btn-outline btn-sm w-fit"
-              >
-                Open test ticket
-              </button>
-            </div>
-          )}
         </div>
       </section>
 
