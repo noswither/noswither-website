@@ -1,0 +1,82 @@
+# Environment Variables Setup
+
+## For Local Development
+
+Your `.env` file uses shell `export` syntax. For local development with Vercel CLI, you have two options:
+
+### Option 1: Use Vercel CLI (Recommended)
+```bash
+npm install -g vercel
+vercel dev
+```
+
+Then set environment variables in Vercel dashboard or use:
+```bash
+vercel env pull
+```
+
+### Option 2: Convert .env to Node.js format
+Create a `.env.local` file (or update `.env`) with:
+```
+VITE_CALENDAR_ICS_URL=https://calendar.google.com/calendar/ical/noswither%40gmail.com/public/basic.ics
+VITE_GOOGLE_API_KEY=...
+VITE_CALENDAR_ID=noswither@gmail.com
+RAZORPAY_KEY_ID=rzp_test_xxxx
+RAZORPAY_KEY_SECRET=xxxx
+# If you get 431 locally, set this to your Vercel deployment URL (no trailing slash):
+# VITE_API_BASE=https://your-project.vercel.app
+```
+
+Note: Remove the `export` keyword - Node.js doesn't need it.
+
+## For Vercel Deployment
+
+Set these in Vercel Dashboard → Project Settings → Environment Variables:
+
+**For Production:**
+- `RAZORPAY_KEY_ID` = Your Razorpay key ID (test or live)
+- `RAZORPAY_KEY_SECRET` = Your Razorpay key secret (test or live)
+- `SHEETS_WEBAPP_URL` = Your Google Apps Script web app URL (if using)
+- `SHEETS_SHARED_SECRET` = Your shared secret (if using)
+- `RESEND_API_KEY` = Your Resend API key (optional, for email)
+- `FROM_EMAIL` = Your sender email (optional)
+
+**Note:** Variables prefixed with `VITE_` are exposed to the client. Server-side variables (like Razorpay secrets) should NOT have the `VITE_` prefix.
+
+## Razorpay Test Mode
+
+1. In Razorpay Dashboard use **Test Mode** (toggle in sidebar). Same env vars: `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` (keys must start with `rzp_test_`).
+2. Test cards: https://razorpay.com/docs/payments/test-cards/  
+   Example: Card `4111 1111 1111 1111`, CVV any 3 digits, expiry any future date.
+3. Ensure your **Google Calendar event description** contains:
+   ```
+   Paid event
+   Fee: 500
+   ```
+   (Replace 500 with your test amount in INR.)
+
+## Fix 431 (Request Header Fields Too Large)
+
+When the **Cookie** header is too big (e.g. lots of localhost cookies), the server returns 431 and payment fails. Two options:
+
+### Option A – Use your deployed API (recommended)
+
+1. Deploy the app to Vercel once: `vercel` (or push to Git if connected).
+2. In Vercel Dashboard set **Environment Variables** for that project: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and any Sheets/email vars.
+3. In your **local** `.env.local` add (use your real Vercel URL):
+   ```
+   VITE_API_BASE=https://your-project.vercel.app
+   ```
+4. Run locally: `npm run dev` or `npm run dev:vercel`.  
+   Payment API requests will go to the **deployed** URL, so no localhost cookies are sent and 431 is avoided. Razorpay test mode works the same.
+
+### Option B – Clear cookies
+
+- Clear all cookies for `http://localhost:3000` (DevTools → Application → Cookies), or  
+- Use an **Incognito/Private** window and open `http://localhost:3000`.
+
+## Troubleshooting
+
+- **"Failed to initiate payment" / 404:** Use `npm run dev:vercel` and open `http://localhost:3000` so `/api` routes are available.
+- **431:** Use Option A (VITE_API_BASE) or Option B (clear cookies / incognito) above.
+- **"Payment gateway not configured":** Set `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` in Vercel env (or in `.env.local` when using `vercel dev`).
