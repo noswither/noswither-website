@@ -30,8 +30,8 @@ function VerifyTicketPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 pt-20">
-        <div className="card bg-base-200/80 border border-base-300 shadow-xl max-w-md w-full">
+      <div className="fixed inset-0 flex items-center justify-center px-4 z-10">
+        <div className="card bg-base-200 border border-base-300 shadow-xl max-w-md w-full">
           <div className="card-body items-center py-12">
             <span className="loading loading-spinner loading-lg text-primary" />
             <p className="text-base-content/70">Verifying ticket…</p>
@@ -44,8 +44,8 @@ function VerifyTicketPage() {
   const valid = result?.valid === true;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 pt-20">
-      <div className="card bg-base-200/80 border border-base-300 shadow-xl max-w-md w-full">
+    <div className="fixed inset-0 flex items-center justify-center px-4 z-10">
+      <div className="card bg-base-200 border border-base-300 shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="card-body items-center text-center">
           {valid ? (
             <>
