@@ -13,6 +13,7 @@ gsap.registerPlugin(CSSPlugin);
 import { Parallax, ParallaxLayer } from '@react-spring/parallax';
 import TeamPage from "./components/TeamPage";
 import RegisterPage from "./components/RegisterPage";
+import VerifyTicketPage from "./components/VerifyTicketPage";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -26,6 +27,7 @@ function AnimatedRoutes() {
           <Route path="app" element={<CommunityPage />}></Route>
           <Route path="team" element={<TeamPage />}></Route>
           <Route path="register" element={<RegisterPage />}></Route>
+          <Route path="verify-ticket" element={<VerifyTicketPage />}></Route>
         </Routes>
       </div>
     </div>

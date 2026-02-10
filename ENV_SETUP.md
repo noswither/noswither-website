@@ -38,6 +38,7 @@ Set these in Vercel Dashboard → Project Settings → Environment Variables:
 - `RAZORPAY_KEY_SECRET` = Your Razorpay key secret (test or live)
 - `SHEETS_WEBAPP_URL` = Your Google Apps Script web app URL (if using)
 - `SHEETS_SHARED_SECRET` = Your shared secret (if using)
+- `TICKET_VERIFY_SECRET` = A secret string used to sign tickets (e.g. `openssl rand -hex 32`). Required for QR verification at the venue; without it, tickets are issued but scans will show "Invalid".
 - `RESEND_API_KEY` = Your Resend API key (optional, for email)
 - `FROM_EMAIL` = Your sender email (optional)
 
@@ -94,3 +95,18 @@ If POST to `https://your-domain.com/api/create-order` returns **405 Method Not A
    - If they do **not** appear, the `api` folder may not be included in the repo or the API build may be skipped; ensure `vercel.json` has the `builds` and `functions` entries and redeploy.
 
 3. **Redeploy** after any `vercel.json` or env change (e.g. from the Deployments tab, "Redeploy" without cache).
+
+## Free vs paid events
+
+- **Free events:** Registration only (form → Google Sheets or `/api/register`). No ticket, no QR code.
+- **Paid events:** Pay → ticket with QR is generated and (optionally) emailed. Only paid events use the ticket flow.
+
+## Testing ticket scan from your phone
+
+1. **Use the live site** (easiest): Open **https://www.noswither.com/register** on your laptop. Add `?testTicket=1` to the URL to show the test button: **https://www.noswither.com/register?testTicket=1**. Click **Open test ticket** so the ticket (with QR) is visible on the laptop screen.
+2. **On your phone:** Unlock the phone and open the **Camera** app (or any QR scanner app). Point it at the **QR code on the laptop screen**.
+3. When the camera recognizes the QR, a banner or notification will appear (e.g. “Open in browser” or the verify-ticket URL). **Tap it** to open the link.
+4. The phone browser will open your **verify-ticket** page and show either **Invalid ticket** (for the test ticket, since it has no real signature) or **Valid ticket** (for a real paid ticket when `TICKET_VERIFY_SECRET` is set).
+5. **To test “Valid” on the phone:** Do a real test payment (or use a paid event in test mode), then scan that ticket’s QR with your phone. You should see **Valid ticket** plus event name and driver name.
+
+**Tip:** If you test on **localhost** (e.g. `npm run dev`), the QR will contain `http://localhost:5173/...`. Your phone can’t open that unless you use the same machine. For phone testing, use the **deployed URL** (e.g. www.noswither.com) or run the app on your machine and access it from the phone using your computer’s local IP (e.g. `http://192.168.1.x:5173/register?testTicket=1`) on the same Wi‑Fi; then the QR will point to that IP and the phone will open the verify page on your phone’s browser.

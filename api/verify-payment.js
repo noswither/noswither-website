@@ -84,6 +84,15 @@ export default async function handler(req, res) {
     // Generate unique ticket ID
     const ticketId = `TKT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
+    // Sign ticket so QR cannot be forged (only our server can produce valid signature)
+    const ticketSecret = process.env.TICKET_VERIFY_SECRET;
+    const eventName = String(registrationData?.eventName || '').slice(0, 200);
+    const driverName = String(registrationData?.driverName || '').slice(0, 200);
+    const ticketPayload = `${ticketId}|${eventName}|${driverName}`;
+    const ticketSignature = ticketSecret
+      ? crypto.createHmac('sha256', ticketSecret).update(ticketPayload).digest('hex')
+      : null;
+
     // Save to Google Sheets – same config as free events (SHEETS_WEBAPP_URL, SHEETS_SHARED_SECRET)
     if (SHEETS_URL && SHEETS_SECRET && registrationData) {
       try {
@@ -110,13 +119,14 @@ export default async function handler(req, res) {
       }
     }
 
-    // Return ticket data
+    // Return ticket data (ticketSignature is used in QR for venue verification)
     res.status(200).json({
       ok: true,
       ticketId: ticketId,
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       registrationData: registrationData,
+      ticketSignature: ticketSignature || undefined,
     });
   } catch (e) {
     console.error('Verify payment error:', e);
