@@ -80,3 +80,17 @@ When the **Cookie** header is too big (e.g. lots of localhost cookies), the serv
 - **"Failed to initiate payment" / 404:** Use `npm run dev:vercel` and open `http://localhost:3000` so `/api` routes are available.
 - **431:** Use Option A (VITE_API_BASE) or Option B (clear cookies / incognito) above.
 - **"Payment gateway not configured":** Set `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` in Vercel env (or in `.env.local` when using `vercel dev`).
+
+### Production 405 on `/api/create-order` (or other API routes)
+
+If POST to `https://your-domain.com/api/create-order` returns **405 Method Not Allowed** and an HTML response (e.g. `index.html`), the request is being handled by the static/SPA layer instead of the serverless function. Check:
+
+1. **Vercel dashboard → Project → Settings → General**  
+   - Do **not** override "Build Command" or "Output Directory" in a way that makes the project static-only.  
+   - "Framework Preset" can be "Vite" or "Other"; `vercel.json` uses custom `builds` so both API and frontend are built.
+
+2. **Vercel dashboard → Deployments → [latest deployment] → Functions**  
+   - Confirm that `api/create-order.js`, `api/verify-payment.js`, `api/register.js`, and `api/send-ticket-email.js` appear.  
+   - If they do **not** appear, the `api` folder may not be included in the repo or the API build may be skipped; ensure `vercel.json` has the `builds` and `functions` entries and redeploy.
+
+3. **Redeploy** after any `vercel.json` or env change (e.g. from the Deployments tab, "Redeploy" without cache).
