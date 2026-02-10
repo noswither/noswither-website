@@ -39,8 +39,8 @@ Set these in Vercel Dashboard → Project Settings → Environment Variables:
 - `SHEETS_WEBAPP_URL` = Your Google Apps Script web app URL (if using)
 - `SHEETS_SHARED_SECRET` = Your shared secret (if using)
 - `TICKET_VERIFY_SECRET` = A secret string used to sign tickets (e.g. `openssl rand -hex 32`). Required for QR verification at the venue; without it, tickets are issued but scans will show "Invalid".
-- `RESEND_API_KEY` = Your Resend API key (optional, for email)
-- `FROM_EMAIL` = Your sender email (optional)
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` = SMTP settings for ticket email (optional; see “Ticket email” below)
+- `FROM_EMAIL` = Sender address for ticket emails (optional)
 
 **Note:** Variables prefixed with `VITE_` are exposed to the client. Server-side variables (like Razorpay secrets) should NOT have the `VITE_` prefix.
 
@@ -55,6 +55,41 @@ Set these in Vercel Dashboard → Project Settings → Environment Variables:
    Fee: 500
    ```
    (Replace 500 with your test amount in INR.)
+
+## Ticket email (Nodemailer – free with Gmail)
+
+After a paid registration, the ticket PDF can be emailed to the attendee. The app uses **Nodemailer** with SMTP. You can use **Gmail for free** (no Resend or other paid service). If you don’t set this up, the ticket still works (download + QR); only the “email me the ticket” step is skipped.
+
+### 1. Gmail App Password
+
+1. Use a **Google account** (e.g. your noswither@gmail.com).
+2. Turn on **2-Step Verification** for that account: [Google Account → Security → 2-Step Verification](https://myaccount.google.com/security).
+3. Create an **App Password**: [Google Account → Security → 2-Step Verification → App passwords](https://myaccount.google.com/apppasswords). Choose “Mail” and your device; copy the 16-character password (no spaces).
+
+### 2. Environment variables (Vercel)
+
+In **Vercel** → Project → Settings → Environment Variables add:
+
+| Name | Value |
+|------|--------|
+| `SMTP_HOST` | `smtp.gmail.com` |
+| `SMTP_PORT` | `587` |
+| `SMTP_USER` | Your Gmail address (e.g. `noswither@gmail.com`) |
+| `SMTP_PASS` | The 16-character App Password from step 1 |
+| `FROM_EMAIL` | Same as `SMTP_USER` or a different “From” address (e.g. `noreply@noswither.com` if you use a custom domain later) |
+
+Do **not** set `SMTP_SECURE` for Gmail (port 587 uses STARTTLS). Redeploy after adding these.
+
+### 3. Other SMTP providers (optional)
+
+You can use any SMTP server instead of Gmail:
+
+- **Outlook / Microsoft 365:** `SMTP_HOST=smtp.office365.com`, `SMTP_PORT=587`, `SMTP_USER` = your email, `SMTP_PASS` = your password or app password.
+- **Other:** Set `SMTP_HOST`, `SMTP_PORT`, and if the server uses TLS from the start set `SMTP_SECURE=true`.
+
+### 4. Verify it works
+
+Do a paid test registration with an email you can check. You should see “Ticket sent to your email” and receive the message with the PDF attached. If not, check Vercel function logs for errors (Gmail may block sign-ins from cloud IPs; in that case try “Less secure app access” or a different SMTP provider).
 
 ## Fix 431 (Request Header Fields Too Large)
 

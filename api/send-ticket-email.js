@@ -1,3 +1,5 @@
+import nodemailer from 'nodemailer';
+
 export default async function handler(req, res) {
   const corsOrigin = '*';
   res.setHeader('Access-Control-Allow-Origin', corsOrigin);
@@ -37,57 +39,57 @@ export default async function handler(req, res) {
       return;
     }
 
-    // Use Resend, SendGrid, or any email service
-    // For now, we'll use a simple approach with Resend (you'll need to set RESEND_API_KEY)
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@noswither.com';
+    const SMTP_HOST = process.env.SMTP_HOST;
+    const SMTP_PORT = process.env.SMTP_PORT || '587';
+    const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
+    const SMTP_USER = process.env.SMTP_USER;
+    const SMTP_PASS = process.env.SMTP_PASS;
+    const FROM_EMAIL = process.env.FROM_EMAIL || SMTP_USER || 'noreply@noswither.com';
 
-    if (!RESEND_API_KEY) {
-      // If no email service configured, just return success (email sending is optional)
-      res.status(200).json({ ok: true, message: 'Email service not configured, ticket generated successfully' });
+    if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+      res.status(200).json({ ok: true, message: 'Email not configured, ticket generated successfully' });
       return;
     }
 
-    // Send email with ticket attachment
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
+    const transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: parseInt(SMTP_PORT, 10),
+      secure: SMTP_SECURE,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS,
       },
-      body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: email,
-        subject: `Your Ticket for ${ticketData.eventName}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #333;">Thank you for registering!</h2>
-            <p>Your ticket for <strong>${ticketData.eventName}</strong> is attached.</p>
-            <p><strong>Ticket ID:</strong> ${ticketData.ticketId}</p>
-            <p><strong>Name:</strong> ${ticketData.driverName}</p>
-            <p>Please bring this ticket (or show the QR code) at the event venue.</p>
-            <p>See you there!</p>
-          </div>
-        `,
-        attachments: ticketPdfBase64 ? [{
-          filename: `ticket-${ticketData.ticketId}.pdf`,
-          content: ticketPdfBase64,
-        }] : [],
-      }),
     });
 
-    if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
-      console.error('Email send error:', errorText);
-      // Still return success as ticket was generated
-      res.status(200).json({ ok: true, message: 'Ticket generated, but email sending failed' });
-      return;
+    const attachments = [];
+    if (ticketPdfBase64) {
+      attachments.push({
+        filename: `ticket-${ticketData.ticketId}.pdf`,
+        content: ticketPdfBase64,
+        encoding: 'base64',
+      });
     }
+
+    await transporter.sendMail({
+      from: FROM_EMAIL,
+      to: email,
+      subject: `Your Ticket for ${ticketData.eventName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Thank you for registering!</h2>
+          <p>Your ticket for <strong>${ticketData.eventName}</strong> is attached.</p>
+          <p><strong>Ticket ID:</strong> ${ticketData.ticketId}</p>
+          <p><strong>Name:</strong> ${ticketData.driverName}</p>
+          <p>Please bring this ticket (or show the QR code) at the event venue.</p>
+          <p>See you there!</p>
+        </div>
+      `,
+      attachments,
+    });
 
     res.status(200).json({ ok: true, message: 'Ticket sent successfully' });
   } catch (e) {
     console.error('Send email error:', e);
-    // Still return success as ticket was generated
     res.status(200).json({ ok: true, message: 'Ticket generated, but email sending failed' });
   }
 }
