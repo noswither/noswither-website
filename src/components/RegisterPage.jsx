@@ -259,6 +259,12 @@ function RegisterPage() {
 
   async function verifyPayment(paymentResponse) {
     try {
+      // Ensure Sheets-required fields are non-empty even for paid events where we hide car details
+      const sheetsPlate =
+        selectedEvent?.isPaid && !form.plate ? "PAID-EVENT-NO-PLATE" : form.plate || "";
+      const sheetsModel =
+        selectedEvent?.isPaid && !form.model ? "PAID-EVENT-NO-MODEL" : form.model || "";
+
       const verifyRes = await fetch(`${apiBase}/api/verify-payment`, {
         method: "POST",
         credentials: "omit",
@@ -270,8 +276,8 @@ function RegisterPage() {
           registrationData: {
             eventName: form.event,
             driverName: form.name,
-            carNumberPlate: form.plate,
-            carMakeModel: form.model,
+            carNumberPlate: sheetsPlate,
+            carMakeModel: sheetsModel,
             contactNumber: form.contact,
             email: form.email,
           },
