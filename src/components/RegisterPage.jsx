@@ -315,7 +315,9 @@ function RegisterPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.name || !form.plate || !form.model || !form.event) return;
+    if (!form.name || !form.event) return;
+    // For free events, car details are required; for paid events we skip them.
+    if (!selectedEvent?.isPaid && (!form.plate || !form.model)) return;
 
     // Check if event requires payment
     if (selectedEvent?.isPaid) {
@@ -414,13 +416,33 @@ function RegisterPage() {
               )}
 
               <div className="form-control">
-                <label className="label"><span className="label-text">Driver Name</span></label>
+                <label className="label"><span className="label-text">Name</span></label>
                 <input name="name" value={form.name} onChange={handleChange} className="input input-bordered" required />
               </div>
-              <div className="form-control">
-                <label className="label"><span className="label-text">Car Number Plate</span></label>
-                <input name="plate" value={form.plate} onChange={handleChange} className="input input-bordered" required />
-              </div>
+              {!selectedEvent?.isPaid && (
+                <>
+                  <div className="form-control">
+                    <label className="label"><span className="label-text">Car Number Plate</span></label>
+                    <input
+                      name="plate"
+                      value={form.plate}
+                      onChange={handleChange}
+                      className="input input-bordered"
+                      required
+                    />
+                  </div>
+                  <div className="form-control md:col-span-2">
+                    <label className="label"><span className="label-text">Car Make & Model</span></label>
+                    <input
+                      name="model"
+                      value={form.model}
+                      onChange={handleChange}
+                      className="input input-bordered"
+                      required
+                    />
+                  </div>
+                </>
+              )}
               <div className="form-control">
                 <label className="label"><span className="label-text">Contact Number</span></label>
                 <input name="contact" type="tel" value={form.contact} onChange={handleChange} className="input input-bordered" required />
@@ -437,10 +459,6 @@ function RegisterPage() {
                   className="input input-bordered"
                   required={selectedEvent?.isPaid}
                 />
-              </div>
-              <div className="form-control md:col-span-2">
-                <label className="label"><span className="label-text">Car Make & Model</span></label>
-                <input name="model" value={form.model} onChange={handleChange} className="input input-bordered" required />
               </div>
               <div className="md:col-span-2">
                 <button className="btn btn-accent w-full" type="submit" disabled={submitting}>
