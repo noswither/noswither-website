@@ -405,7 +405,11 @@ function RegisterPage() {
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
-                  <span>This is a paid event. Registration fee: <strong>₹{selectedEvent.fee}</strong></span>
+                  <span>
+                    This is a paid event. Registration fee: <strong>₹{selectedEvent.fee}</strong>.
+                    {' '}
+                    After you complete payment and Razorpay redirects back here, please wait a few seconds for your ticket with QR code to pop up.
+                  </span>
                 </div>
               )}
 
@@ -447,7 +451,6 @@ function RegisterPage() {
           </form>
           <div className="opacity-70 text-sm">
             Note: Your registration is logged to our internal database. Location and other personal details are never published.
-            {selectedEvent?.isPaid && " For paid events, a ticket with QR code will be generated after payment."}
           </div>
         </div>
       </section>

@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    const { email, ticketData, ticketPdfBase64 } = body;
+    const { email, ticketData } = body;
 
     if (!email || !ticketData) {
       res.status(400).json({ ok: false, error: 'Missing email or ticket data' });
@@ -61,15 +61,6 @@ export default async function handler(req, res) {
       },
     });
 
-    const attachments = [];
-    if (ticketPdfBase64) {
-      attachments.push({
-        filename: `ticket-${ticketData.ticketId}.pdf`,
-        content: ticketPdfBase64,
-        encoding: 'base64',
-      });
-    }
-
     await transporter.sendMail({
       from: FROM_EMAIL,
       to: email,
@@ -77,19 +68,18 @@ export default async function handler(req, res) {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">Thank you for registering!</h2>
-          <p>Your ticket for <strong>${ticketData.eventName}</strong> is attached.</p>
+          <p>Your ticket for <strong>${ticketData.eventName}</strong> is confirmed.</p>
           <p><strong>Ticket ID:</strong> ${ticketData.ticketId}</p>
           <p><strong>Name:</strong> ${ticketData.driverName}</p>
           <p>Please bring this ticket (or show the QR code) at the event venue.</p>
           <p>See you there!</p>
         </div>
       `,
-      attachments,
     });
 
     res.status(200).json({ ok: true, message: 'Ticket sent successfully' });
   } catch (e) {
     console.error('Send email error:', e);
-    res.status(200).json({ ok: true, message: 'Ticket generated, but email sending failed' });
+    res.status(500).json({ ok: false, message: 'Ticket generated, but email sending failed', error: e.message });
   }
 }

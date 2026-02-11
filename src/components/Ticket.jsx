@@ -1,6 +1,5 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { toast } from 'react-toastify';
 
 function formatEventDate(dateInput) {
   if (!dateInput) return '';
@@ -18,119 +17,10 @@ function formatEventDate(dateInput) {
 
 function Ticket({ ticketData, onClose }) {
   const ticketRef = useRef(null);
-  const [emailSent, setEmailSent] = useState(false);
-  const [pdfGenerated, setPdfGenerated] = useState(false);
 
-  const generatePDFBlob = async () => {
-    const { jsPDF } = await import('jspdf');
-    const html2canvas = (await import('html2canvas')).default;
-    const element = ticketRef.current;
-    if (!element) return null;
-
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#0f0f14',
-    });
-
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: [210, 297],
-    });
-
-    const imgWidth = 210;
-    const pageHeight = 297;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-    return pdf;
-  };
-
-  const sendEmailWithPdf = async (pdf) => {
-    if (!ticketData?.email) return;
-    try {
-      const pdfBlob = pdf.output('blob');
-      const reader = new FileReader();
-      reader.readAsDataURL(pdfBlob);
-      reader.onloadend = async () => {
-        const base64Pdf = reader.result.split(',')[1];
-        const apiBase = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
-        const res = await fetch(`${apiBase}/api/send-ticket-email`, {
-          method: 'POST',
-          credentials: 'omit',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: ticketData.email,
-            ticketData,
-            ticketPdfBase64: base64Pdf,
-          }),
-        });
-        const data = res.ok ? await res.json().catch(() => ({})) : {};
-        if (res.ok && data.ok !== false) {
-          setEmailSent(true);
-          toast.success('Ticket sent to your email.');
-        } else {
-          toast.info('Ticket ready. Email may not be configured.');
-        }
-      };
-    } catch (e) {
-      console.error('Email send error:', e);
-      toast.info('Ticket ready. Could not send email.');
-    }
-  };
-
-  useEffect(() => {
-    if (!ticketData || !ticketRef.current || pdfGenerated) return;
-    const run = async () => {
-      try {
-        const pdf = await generatePDFBlob();
-        if (!pdf) return;
-        setPdfGenerated(true);
-        // Open PDF in new tab
-        const blob = pdf.output('blob');
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank', 'noopener,noreferrer');
-        setTimeout(() => URL.revokeObjectURL(url), 30000);
-        // Send email in background
-        await sendEmailWithPdf(pdf);
-      } catch (err) {
-        console.error('PDF generation error:', err);
-        toast.error('Could not generate ticket PDF.');
-      }
-    };
-    const t = setTimeout(run, 600);
-    return () => clearTimeout(t);
-  }, [ticketData, pdfGenerated]);
-
-  const handleDownload = async () => {
-    try {
-      const pdf = await generatePDFBlob();
-      if (pdf) pdf.save(`ticket-${ticketData.ticketId}.pdf`);
-    } catch (err) {
-      console.error(err);
-      toast.error('Could not download PDF.');
-    }
-  };
-
-  const handleEmailMe = async () => {
-    try {
-      const pdf = await generatePDFBlob();
-      if (pdf) await sendEmailWithPdf(pdf);
-    } catch (err) {
-      console.error(err);
-      toast.error('Could not send email.');
-    }
+  const handleDownload = () => {
+    // Simple: let the user print the current page (modal)
+    window.print();
   };
 
   if (!ticketData) return null;
@@ -226,19 +116,19 @@ function Ticket({ ticketData, onClose }) {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3 mt-6">
-            <button type="button" onClick={handleDownload} className="btn btn-primary flex-1 min-w-[140px]">
-              Download PDF
+          <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="btn btn-primary w-full sm:flex-1"
+            >
+              Print / Save Ticket
             </button>
             <button
               type="button"
-              onClick={handleEmailMe}
-              className="btn btn-outline flex-1 min-w-[140px]"
-              disabled={emailSent}
+              onClick={onClose}
+              className="btn btn-ghost w-full sm:flex-1"
             >
-              {emailSent ? 'Email sent' : 'Email me the ticket'}
-            </button>
-            <button type="button" onClick={onClose} className="btn btn-ghost flex-1 min-w-[100px]">
               Close
             </button>
           </div>
